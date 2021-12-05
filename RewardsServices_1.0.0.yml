@@ -1,0 +1,107 @@
+openapi: 3.0.0
+info:
+  title: Customer Rewards API
+  description: Customer Rewards RESTful API provides a number of interfaces related to Customer and their transactions, rewards.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/
+    description: Local host
+paths:
+  /v1/customers/{customerId}/rewardsummary:
+    get:
+      summary: Returns reward summary (monthly & total) of a customer for the provided search date range.
+      security:
+        - basicAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CustomerIdPathParam'
+        - $ref: '#/components/parameters/StartDateQueryParam'
+        - $ref: '#/components/parameters/EndDateQueryParam'
+      responses:
+        '200':
+          description: Success - Reward Summary is successfully retrieved
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                    message:
+                        $ref: '#/components/schemas/Message'
+                    rewards:
+                        $ref: '#/components/schemas/CustomerRewards'
+                        
+        '400':
+            $ref: '#/components/responses/ErrorResponse'
+        '401':
+            $ref: '#/components/responses/ErrorResponse'
+        '404':
+            $ref: '#/components/responses/ErrorResponse'
+        '500':
+            $ref: '#/components/responses/ErrorResponse'
+          
+components:
+  schemas:
+    Message:
+      properties:
+        code:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+    CustomerRewards:
+      properties:
+        customerId:
+          type: integer
+        name:
+          type: string
+        totalRewardCount:
+          type: integer
+        monthlyRewards:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyRewards'
+    MonthlyRewards:
+      properties:
+        month:
+          type: string
+        rewardsCount:
+          type: integer
+          
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+                    
+  responses:
+    ErrorResponse:
+      description: 'Response in case of any validation errors or exceptions'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                $ref: '#/components/schemas/Message'
+                                
+  parameters:
+    CustomerIdPathParam:
+      name: customerId
+      in: path
+      required: true
+      description: Customer id
+      schema:
+        type: integer
+    StartDateQueryParam:
+      name: startDate
+      in: query
+      required: true
+      description: Search start date in YYYY-MM-DD format
+      schema:
+        type: string
+    EndDateQueryParam:
+      name: endDate
+      in: query
+      required: true
+      description: Search end date in YYYY-MM-DD format
+      schema:
+        type: string
